@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/253asap/classDiscordBot/issues"
   },
-  "homepage": "https://github.com/253asap/classDiscordBot#readme"
+  "homepage": "https://github.com/253asap/classDiscordBot#readme",
+  "devDependencies": {},
+  "dependencies": {
+    "dotenv": "^8.2.0"
+  }
 }
