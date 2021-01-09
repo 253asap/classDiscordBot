@@ -26,6 +26,7 @@ let fetchAssignments = () =>{
     const canvasApiUrl = `https://canvas.instructure.com/api/v1/courses/${course.courseID}/assignments?access_token=${process.env.SDT1_TOKEN}`;
     const fetchResponse = await fetch(canvasApiUrl);
     const json = await fetchResponse.json();
+    const d = new Date;
     for(let i = 0; i<json.length;i++){
       assignmentArray.push(
         {assignmentName:json[i].name,
@@ -33,7 +34,7 @@ let fetchAssignments = () =>{
         dueDate:json[i].due_at}
       )
     }
-    console.log(assignmentArray)
+    console.log(d.toISOString().slice(0,-8))
   })
 
 }
