@@ -28,15 +28,18 @@ let fetchAssignments = () =>{
     const json = await fetchResponse.json();
     const d = new Date;
     for(let i = 0; i<json.length;i++){
-      assignmentArray.push(
+      if(Date.parse(json[i].due_at)>Date.parse(d.toISOString())){
+        assignmentArray.push(
         {assignmentName:json[i].name,
         url:json[i].html_url,
         dueDate:json[i].due_at}
-      )
+       )
+      }
     }
-    console.log(d.toISOString().slice(0,-8))
+    console.log(assignmentArray.length); //this is returning 14
+    // console.log(d.toISOString().slice(0,-8))
   })
-
+  console.log(assignmentArray.length); //this is returning 0, I think await is messing it up
 }
 
 client.on('ready', () => {
