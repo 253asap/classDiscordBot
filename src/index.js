@@ -13,7 +13,7 @@ const checkCommand = (msg,msgChannelID) => {
   }
 }
 
-let fetchAssignments = () =>{
+let fetchAssignments = async () =>{
   const courses = [
     {course: 'IT 211',courseID:'90000002053946'},
     {course: 'IT 121',courseID:'90000002033847'},
@@ -21,25 +21,28 @@ let fetchAssignments = () =>{
     {course: 'BTM 113',courseID:'90000002033839'},
     {course: 'BTM 100',courseID:'90000001977201'}
   ]
-  const assignmentArray = [];
-  courses.forEach(async course=>{
+  const courseArray = courses.map(async course=>{
     const canvasApiUrl = `https://canvas.instructure.com/api/v1/courses/${course.courseID}/assignments?access_token=${process.env.SDT1_TOKEN}`;
     const fetchResponse = await fetch(canvasApiUrl);
     const json = await fetchResponse.json();
-    const d = new Date;
-    for(let i = 0; i<json.length;i++){
-      if(Date.parse(json[i].due_at)>Date.parse(d.toISOString())){
+    return json;
+  })
+  const d = new Date;
+  let assignmentArray = []
+
+  await (await Promise.all(courseArray)).forEach(course=>{
+    for(assignment of course){
+      if(Date.parse(assignment.due_at)>Date.parse(d.toISOString())){
         assignmentArray.push(
-        {assignmentName:json[i].name,
-        url:json[i].html_url,
-        dueDate:json[i].due_at}
+        {assignmentName:assignment.name,
+        url:assignment.html_url,
+        dueDate:assignment.due_at}
        )
       }
     }
-    console.log(assignmentArray.length); //this is returning 14
-    // console.log(d.toISOString().slice(0,-8))
   })
-  console.log(assignmentArray.length); //this is returning 0, I think await is messing it up
+
+  console.log(assignmentArray)
 }
 
 client.on('ready', () => {
