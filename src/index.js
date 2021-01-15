@@ -13,7 +13,18 @@ const checkCommand = (msg,msgChannelID) => {
   }
 }
 
-let fetchAssignments = async () =>{
+let assignmentCall = async (courses)=>{
+  let courseArray = [];
+  for (course of courses){
+    const canvasApiUrl = `https://canvas.instructure.com/api/v1/courses/${course.courseID}/assignments?access_token=${process.env.SDT1_TOKEN}`;
+    const fetchResponse = await fetch(canvasApiUrl);
+    const json = await fetchResponse.json();
+    courseArray.push(json);
+  }
+  return courseArray;
+}
+
+let fetchAssignments = () =>{
   const courses = [
     {course: 'IT 211',courseID:'90000002053946'},
     {course: 'IT 121',courseID:'90000002033847'},
@@ -21,28 +32,26 @@ let fetchAssignments = async () =>{
     {course: 'BTM 113',courseID:'90000002033839'},
     {course: 'BTM 100',courseID:'90000001977201'}
   ]
-  const courseArray = courses.map(async course=>{
-    const canvasApiUrl = `https://canvas.instructure.com/api/v1/courses/${course.courseID}/assignments?access_token=${process.env.SDT1_TOKEN}`;
-    const fetchResponse = await fetch(canvasApiUrl);
-    const json = await fetchResponse.json();
-    return json;
-  })
-  const d = new Date;
-  let assignmentArray = []
 
-  await (await Promise.all(courseArray)).forEach(course=>{
-    for(assignment of course){
-      if(Date.parse(assignment.due_at)>Date.parse(d.toISOString())){
-        assignmentArray.push(
-        {assignmentName:assignment.name,
-        url:assignment.html_url,
-        dueDate:assignment.due_at}
-       )
+  assignmentCall(courses).then(v=>{
+    let assignmentArray = []
+    const d = new Date;
+  
+    for (let i=0; i<v.length; i++){
+      for(assignment of v[i]){
+        if(Date.parse(assignment.due_at)>Date.parse(d.toISOString())){
+          assignmentArray.push(
+          {assignmentName:assignment.name,
+          url:assignment.html_url,
+          dueDate:assignment.due_at}
+          )
+        }
       }
     }
-  })
+    console.log(assignmentArray);
+    // return assignmentArray
+  }).catch(err=>console.log(err))
 
-  console.log(assignmentArray)
 }
 
 client.on('ready', () => {
@@ -55,6 +64,5 @@ client.on('message', msg => {
     msg.channel.send(`fuck you <@${msg.author.id}>`);
   }
 })
-
-client.login(process.env.DISCORD_TOKEN);
 fetchAssignments();
+client.login(process.env.DISCORD_TOKEN);
